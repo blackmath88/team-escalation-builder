@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Protection & Escalation Builder</title>
+  <style>
+    :root {
+      --bg: #eef3f9;
+      --panel: #ffffff;
+      --panel-alt: #f7fafd;
+      --ink: #1d2a3a;
+      --muted: #5d6a7d;
+      --line: #d7e0ea;
+      --blue: #294d73;
+      --blue-soft: #dce9f6;
+      --blue-strong: #17324d;
+      --yellow: #f6e6a7;
+      --yellow-soft: #fff8de;
+      --green: #2d6b57;
+      --shadow: 0 18px 42px rgba(25, 45, 70, 0.08);
+      --radius: 18px;
+      --radius-sm: 12px;
+      --max: 1240px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Aptos, "Segoe UI", Candara, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(189, 213, 235, 0.55), transparent 30%),
+        linear-gradient(180deg, #f7fbff 0%, var(--bg) 42%, #e8eef6 100%);
+      line-height: 1.5;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: Charter, "Palatino Linotype", Georgia, serif;
+      margin: 0;
+      color: var(--blue-strong);
+      line-height: 1.15;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: 0;
+      border-radius: 999px;
+      transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    .shell {
+      width: min(var(--max), calc(100% - 28px));
+      margin: 24px auto 48px;
+    }
+
+    .hero {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(244, 249, 255, 0.92));
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -100px -100px auto;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(41, 77, 115, 0.12), transparent 68%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      color: var(--blue-strong);
+      font-size: 0.92rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 4vw, 3.45rem);
+      margin-bottom: 12px;
+    }
+
+    .hero .lead {
+      font-size: 1.08rem;
+      color: var(--muted);
+      max-width: 780px;
+    }
+
+    .hero-quote,
+    .meta-card,
+    .panel,
+    .step-panel,
+    .mini-card,
+    .concept-card,
+    .level-card,
+    .prompt-card,
+    .output-card,
+    .selected-triggers,
+    .toast {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 12px 28px rgba(19, 44, 71, 0.05);
+    }
+
+    .hero-quote {
+      padding: 20px;
+      background: linear-gradient(180deg, #f7fbff 0%, #ffffff 100%);
+    }
+
+    .hero-quote p {
+      color: var(--blue-strong);
+      font-size: 1rem;
+    }
+
+    .hero-quote strong {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .meta-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .meta-card {
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.82);
+    }
+
+    .meta-card h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .meta-card p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin: 22px 0 18px;
+      flex-wrap: wrap;
+    }
+
+    .privacy {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .saved-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: #edf7f2;
+      color: var(--green);
+      font-weight: 600;
+      border: 1px solid rgba(45, 107, 87, 0.14);
+    }
+
+    .saved-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 0 rgba(45, 107, 87, 0.45);
+      animation: pulse 2.1s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(45, 107, 87, 0.42); }
+      70% { box-shadow: 0 0 0 12px rgba(45, 107, 87, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(45, 107, 87, 0); }
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) 360px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 20px;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .step-button {
+      padding: 12px 10px;
+      background: #f7fbff;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      text-align: left;
+      min-height: 76px;
+      border-radius: 18px;
+    }
+
+    .step-button strong {
+      display: block;
+      font-size: 0.9rem;
+      color: var(--blue-strong);
+      margin-bottom: 3px;
+    }
+
+    .step-button span {
+      font-size: 0.82rem;
+      line-height: 1.25;
+      display: block;
+    }
+
+    .step-button.active {
+      background: linear-gradient(180deg, #e8f1fa, #f9fcff);
+      color: var(--blue-strong);
+      border-color: #bfd2e6;
+      box-shadow: inset 0 0 0 1px rgba(41, 77, 115, 0.08);
+    }
+
+    .step-panel {
+      padding: 24px;
+      min-height: 740px;
+    }
+
+    .step-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .step-head p {
+      color: var(--muted);
+      max-width: 760px;
+    }
+
+    .learning-points,
+    .form-grid,
+    .concept-grid,
+    .level-grid,
+    .trigger-grid,
+    .actions,
+    .prompt-tabs,
+    .output-actions,
+    .summary-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .learning-points,
+    .concept-grid,
+    .level-grid,
+    .trigger-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .form-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .field,
+    .mini-card,
+    .concept-card,
+    .level-card,
+    .prompt-card,
+    .output-card,
+    .selected-triggers {
+      padding: 16px;
+    }
+
+    .field {
+      background: var(--panel-alt);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+    }
+
+    .field.wide {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      color: var(--blue-strong);
+      margin-bottom: 8px;
+    }
+
+    .helper {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-bottom: 14px;
+    }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      border: 1px solid #c8d6e5;
+      border-radius: 14px;
+      padding: 12px 13px;
+      background: #ffffff;
+      color: var(--ink);
+      resize: vertical;
+      min-height: 48px;
+    }
+
+    textarea {
+      min-height: 108px;
+    }
+
+    .mini-card {
+      background: linear-gradient(180deg, #f7fbff, #ffffff);
+    }
+
+    .mini-card h3,
+    .concept-card h3,
+    .level-card h3,
+    .prompt-card h3,
+    .output-card h3 {
+      font-size: 1.08rem;
+      margin-bottom: 8px;
+    }
+
+    .mini-card p,
+    .concept-card p,
+    .level-card p,
+    .prompt-card p,
+    .output-card p,
+    .summary-card p,
+    .selected-triggers p {
+      color: var(--muted);
+    }
+
+    .concept-card {
+      background: linear-gradient(180deg, #ffffff, #f7fbff);
+    }
+
+    .concept-card .question {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed #c9d4df;
+      color: var(--blue-strong);
+      font-weight: 600;
+    }
+
+    .level-card {
+      background: linear-gradient(180deg, #ffffff, #f8fbff);
+    }
+
+    .level-tag {
+      display: inline-flex;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      color: var(--blue-strong);
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .level-card .form-grid {
+      margin-top: 14px;
+    }
+
+    .chip-row,
+    .selected-list,
+    .prompt-tabs,
+    .nav-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid #c7d5e3;
+      background: #ffffff;
+      color: var(--blue-strong);
+      font-size: 0.94rem;
+    }
+
+    .chip.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #ffffff;
+    }
+
+    .selected-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #eef5fc;
+      color: var(--blue-strong);
+      border: 1px solid #d2dfeb;
+      font-size: 0.92rem;
+    }
+
+    .selected-chip button {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .ai-note,
+    .prompt-card,
+    .prompt-tab.active {
+      border-color: #e4c86d;
+    }
+
+    .ai-note {
+      padding: 16px 18px;
+      border: 1px solid #ead68b;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(180deg, var(--yellow-soft), #fffdf2);
+      color: #6b5a1d;
+      margin-bottom: 16px;
+    }
+
+    .prompt-tabs {
+      margin-bottom: 14px;
+    }
+
+    .prompt-tab {
+      padding: 11px 16px;
+      background: #fffdf5;
+      color: #735f1f;
+      border: 1px solid #f1dfa0;
+    }
+
+    .prompt-tab.active {
+      background: var(--yellow);
+      color: #493a08;
+      box-shadow: inset 0 0 0 1px rgba(73, 58, 8, 0.05);
+    }
+
+    .prompt-card {
+      background: linear-gradient(180deg, #fffdf4, #fff9e7);
+    }
+
+    .prompt-card textarea {
+      min-height: 340px;
+      background: rgba(255, 255, 255, 0.78);
+    }
+
+    .summary-card {
+      position: sticky;
+      top: 20px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .summary-card .panel {
+      padding: 18px;
+    }
+
+    .summary-list {
+      grid-template-columns: 1fr;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid #ebf0f6;
+    }
+
+    .summary-item:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .summary-item strong {
+      color: var(--blue-strong);
+    }
+
+    .summary-item span {
+      color: var(--muted);
+      text-align: right;
+      max-width: 180px;
+    }
+
+    .progress {
+      height: 12px;
+      border-radius: 999px;
+      background: #e6eef7;
+      overflow: hidden;
+      border: 1px solid #d7e1ec;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, #87abcf, #2d5278);
+      border-radius: inherit;
+      transition: width 0.2s ease;
+    }
+
+    .output-card {
+      background: linear-gradient(180deg, #ffffff, #f8fbff);
+    }
+
+    .output-sections {
+      display: grid;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .output-section {
+      padding: 14px;
+      background: #ffffff;
+      border: 1px solid #dde6ef;
+      border-radius: 14px;
+    }
+
+    .output-section h4 {
+      margin-bottom: 8px;
+      font-size: 1rem;
+    }
+
+    .output-section ul {
+      margin: 8px 0 0 18px;
+      color: var(--muted);
+      padding: 0;
+    }
+
+    .output-section li + li {
+      margin-top: 6px;
+    }
+
+    .output-actions,
+    .actions {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin-top: 18px;
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-quiet,
+    .btn-danger {
+      padding: 12px 16px;
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      background: var(--blue);
+      color: #ffffff;
+    }
+
+    .btn-secondary {
+      background: #eef4fa;
+      color: var(--blue-strong);
+      border: 1px solid #d5e0eb;
+    }
+
+    .btn-quiet {
+      background: #fffdf5;
+      color: #765f12;
+      border: 1px solid #edd98b;
+    }
+
+    .btn-danger {
+      background: #fff2f0;
+      color: #8a3d34;
+      border: 1px solid #efc7c1;
+    }
+
+    .nav-actions {
+      justify-content: space-between;
+      margin-top: 18px;
+    }
+
+    .nav-actions .group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .empty-state {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      padding: 14px 16px;
+      max-width: 280px;
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .print-only {
+      display: none;
+    }
+
+    @media (max-width: 1100px) {
+      .hero-grid,
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-card {
+        position: static;
+      }
+
+      .steps {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .shell {
+        width: min(100% - 16px, var(--max));
+        margin-top: 12px;
+      }
+
+      .hero,
+      .step-panel,
+      .panel {
+        padding: 18px;
+      }
+
+      .steps,
+      .meta-row,
+      .learning-points,
+      .form-grid,
+      .concept-grid,
+      .level-grid,
+      .trigger-grid,
+      .actions,
+      .output-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .step-button {
+        min-height: auto;
+      }
+
+      .nav-actions {
+        flex-direction: column;
+      }
+
+      .nav-actions .group {
+        width: 100%;
+      }
+
+      .nav-actions .group button {
+        flex: 1;
+      }
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+      }
+
+      .hero,
+      .topbar,
+      .steps,
+      .summary-card,
+      .nav-actions,
+      .output-actions,
+      .actions,
+      .toast {
+        display: none !important;
+      }
+
+      .workspace,
+      .panel,
+      .step-panel,
+      .output-card,
+      .output-section {
+        display: block;
+        box-shadow: none;
+        border: 0;
+        padding: 0;
+        background: #ffffff;
+      }
+
+      .step-panel > *:not(.final-step) {
+        display: none !important;
+      }
+
+      .final-step {
+        display: block !important;
+      }
+
+      .print-only {
+        display: block;
+        margin-bottom: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <div class="eyebrow">Single-file workshop tool</div>
+      <div class="hero-grid">
+        <div>
+          <h1>Team Protection &amp; Escalation Builder</h1>
+          <p class="lead">A calm, practical workshop space for defining when concerns stay in team dialogue, when protected consultation is needed, and when formal or independent escalation should be activated.</p>
+        </div>
+        <div class="hero-quote">
+          <strong>Core framing</strong>
+          <p>Escalation is not a sign of failure. It is a pre-agreed protection path when people, roles, or decisions come under pressure.</p>
+        </div>
+      </div>
+      <div class="meta-row">
+        <div class="meta-card">
+          <h3>Use it in 45-90 minutes</h3>
+          <p>Move through the seven steps, edit the default model, and leave with a one-page draft your team can review together.</p>
+        </div>
+        <div class="meta-card">
+          <h3>Built for sensitive contexts</h3>
+          <p>Especially useful for university teams, ethics committees, governance bodies, and groups where hierarchy affects whether people speak up.</p>
+        </div>
+        <div class="meta-card">
+          <h3>Private by default</h3>
+          <p>Everything stays in your browser unless you choose to copy, print, or export your model.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="topbar">
+      <p class="privacy">All inputs remain in your browser unless you copy, print, or export them.</p>
+      <div class="saved-pill"><span class="saved-dot"></span><span id="saveStatus">Saved locally</span></div>
+    </div>
+
+    <div class="workspace">
+      <section class="panel">
+        <div class="steps" id="stepNav"></div>
+        <div class="step-panel" id="stepPanel"></div>
+      </section>
+
+      <aside class="summary-card">
+        <div class="panel">
+          <h3>Workshop snapshot</h3>
+          <p style="color: var(--muted); margin-top: 8px;">A quick view of how much of the model is already defined.</p>
+          <div style="margin: 16px 0 10px;" class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+          <div class="summary-list" id="summaryList"></div>
+        </div>
+
+        <div class="panel">
+          <h3>Workshop reminder</h3>
+          <p style="color: var(--muted); margin-top: 8px;">Aim for the lowest effective level, but keep protected and independent routes available when safety, ethics, legality, or hierarchy require them.</p>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORAGE_KEY = "team-protection-escalation-builder-v1";
+    const stepMeta = [
+      { id: 1, short: "Start", title: "Why this matters" },
+      { id: 2, short: "Context", title: "Context capture" },
+      { id: 3, short: "Concepts", title: "Shared language" },
+      { id: 4, short: "Levels", title: "Escalation levels" },
+      { id: 5, short: "Triggers", title: "Trigger workshop" },
+      { id: 6, short: "AI", title: "Prompt builder" },
+      { id: 7, short: "Onepager", title: "Final output" }
+    ];
+
+    const conceptCards = [
+      {
+        title: "Psychological Safety",
+        definition: "People can raise concerns, mistakes, and risks without fear of humiliation or retaliation.",
+        example: "A junior researcher can question an ethical decision without being labelled difficult.",
+        question: "What would make people feel safe enough to speak here?"
+      },
+      {
+        title: "Speak-Up Culture",
+        definition: "Concerns are surfaced early and treated as contributions to quality, integrity, and safety.",
+        example: "A staff member raises a concern before a decision becomes formal.",
+        question: "Where do people currently stay silent?"
+      },
+      {
+        title: "Power Asymmetry",
+        definition: "Status, hierarchy, contracts, or academic authority can limit what people feel able to say.",
+        example: "A PhD student hesitates to challenge a professor who influences their career.",
+        question: "Which power differences matter most in our context?"
+      },
+      {
+        title: "Confidentiality",
+        definition: "Information is shared only with people who need it to handle the concern appropriately.",
+        example: "A concern is discussed with a trusted contact before names are shared more widely.",
+        question: "What must remain confidential at each level?"
+      },
+      {
+        title: "Non-Retaliation",
+        definition: "People who raise concerns in good faith must not suffer disadvantages, exclusion, or career harm.",
+        example: "A person who reports pressure is protected from subtle retaliation.",
+        question: "What would retaliation look like in our setting?"
+      },
+      {
+        title: "Independent Channel",
+        definition: "A route outside the normal hierarchy when the hierarchy itself is part of the problem.",
+        example: "An ombuds office, ethics office, HR contact, or trusted external person can be consulted.",
+        question: "When is the direct line not safe enough?"
+      },
+      {
+        title: "Graded Assertiveness",
+        definition: "Language can escalate step by step: probe, alert, challenge, escalate.",
+        example: "I have a concern -> I am uncomfortable -> This may be unsafe or unethical -> We need to stop and escalate.",
+        question: "What phrases would help people speak up early?"
+      },
+      {
+        title: "De-escalation",
+        definition: "After the concern is handled, the team intentionally returns to normal work and restores trust.",
+        example: "After a formal clarification, the team debriefs and updates the process.",
+        question: "How do we close the loop after escalation?"
+      }
+    ];
+
+    const triggerOptions = [
+      "A person feels pressured",
+      "Hierarchy prevents open discussion",
+      "Confidentiality is at risk",
+      "The direct reporting line is part of the problem",
+      "A decision is pushed through despite documented concerns",
+      "Staff fear negative consequences",
+      "Several people report similar patterns",
+      "A professor, senior leader, or influential stakeholder is involved",
+      "Ethical, legal, safety, or reputational risk emerges",
+      "Informal clarification failed",
+      "The affected person asks for support",
+      "Decision rights are unclear",
+      "Retaliation risk exists",
+      "Immediate protection is needed",
+      "External or independent review may be necessary"
+    ];
+
+    const defaultLevels = [
+      {
+        number: 0,
+        name: "Normal Mode",
+        purpose: "The issue can be handled in regular team dialogue.",
+        triggers: "Ordinary disagreement, minor misunderstanding, process question, or clarification needed.",
+        safeStep: "Discuss in the team or with the involved person, if safe.",
+        roles: "Involved colleagues, team members, or the normal chairing role.",
+        safeguards: "Respectful dialogue, no blame, and no unnecessary sharing.",
+        documentation: "Usually informal. Note only what helps with follow-up.",
+        deescalation: "Clarification is reached and normal collaboration can continue."
+      },
+      {
+        number: 1,
+        name: "Early Signal",
+        purpose: "A concern, irritation, or uncertainty becomes visible and should be surfaced early.",
+        triggers: "Someone feels uncomfortable, a concern is repeated, or there is uncertainty about ethics, authority, or confidentiality.",
+        safeStep: "Raise the issue with a trusted colleague, chair, or designated contact.",
+        roles: "Trusted peer, chair, or designated point of contact.",
+        safeguards: "The concern is acknowledged without pressure to formalize it immediately.",
+        documentation: "Keep a light record if patterns might matter later.",
+        deescalation: "The concern is resolved early or redirected to a clearer route."
+      },
+      {
+        number: 2,
+        name: "Protected Consultation",
+        purpose: "A neutral or trusted person is involved without forcing formal escalation.",
+        triggers: "The direct line feels unsafe, power asymmetry is strong, or the person fears negative consequences.",
+        safeStep: "Consult an ombuds office, HR, ethics contact, trusted person, or neutral advisor.",
+        roles: "Ombuds, HR, ethics contact, neutral advisor, or another protected channel.",
+        safeguards: "Confidential consultation, need-to-know sharing, and explicit non-retaliation.",
+        documentation: "Document enough to preserve options without exposing more than necessary.",
+        deescalation: "A safer route is agreed and the issue can return to an appropriate level of handling."
+      },
+      {
+        number: 3,
+        name: "Formal Clarification",
+        purpose: "Formal governance, leadership, compliance, ethics, or institutional structures are activated.",
+        triggers: "Ethical, legal, safety, discrimination, harassment, integrity, or repeated unresolved concerns.",
+        safeStep: "Document the concern and activate the appropriate formal route.",
+        roles: "Formal leadership, HR, compliance, ethics office, or institutional review roles.",
+        safeguards: "Clear documentation, role clarity, confidentiality, and protection from retaliation.",
+        documentation: "A formal record is created with access limited to those who need it.",
+        deescalation: "A decision, clarification, or protective action is completed and communicated appropriately."
+      },
+      {
+        number: 4,
+        name: "Protection Mode",
+        purpose: "Immediate protective action, independent review, or crisis handling is required.",
+        triggers: "Immediate harm, severe misconduct, retaliation risk, compromised internal channels, or urgent institutional risk.",
+        safeStep: "Activate an independent or senior protection channel immediately.",
+        roles: "Independent review body, senior institutional protection channel, or crisis leadership.",
+        safeguards: "Immediate safety measures, restricted access, anti-retaliation monitoring, and independent review.",
+        documentation: "Document essential facts quickly and securely for protection and review.",
+        deescalation: "Immediate risk is controlled and a safe recovery or follow-up plan is in place."
+      }
+    ];
+
+    const defaultState = {
+      activeStep: 1,
+      activePrompt: "sharpen",
+      context: {
+        teamName: "",
+        sensitiveSituations: "",
+        powerAsymmetries: "",
+        protectionNeeds: "",
+        existingChannels: "",
+        redLines: "",
+        reviewRhythm: "Quarterly review or after a major case"
+      },
+      selectedTriggers: [],
+      customTriggerInput: "",
+      customTriggers: [],
+      openQuestions: "",
+      levels: defaultLevels.map(level => ({ ...level }))
+    };
+
+    let state = loadState();
+    let saveTimer = null;
+
+    const stepNav = document.getElementById("stepNav");
+    const stepPanel = document.getElementById("stepPanel");
+    const summaryList = document.getElementById("summaryList");
+    const progressBar = document.getElementById("progressBar");
+    const saveStatus = document.getElementById("saveStatus");
+    const toast = document.getElementById("toast");
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) return structuredClone(defaultState);
+        const parsed = JSON.parse(saved);
+        return {
+          ...structuredClone(defaultState),
+          ...parsed,
+          context: {
+            ...structuredClone(defaultState).context,
+            ...(parsed.context || {})
+          },
+          levels: Array.isArray(parsed.levels) && parsed.levels.length === defaultLevels.length
+            ? parsed.levels.map((level, index) => ({ ...defaultLevels[index], ...level }))
+            : defaultLevels.map(level => ({ ...level }))
+        };
+      } catch (error) {
+        return structuredClone(defaultState);
+      }
+    }
+
+    function setState(updater) {
+      if (typeof updater === "function") {
+        updater(state);
+      } else {
+        state = { ...state, ...updater };
+      }
+      render();
+      queueSave();
+    }
+
+    function queueSave() {
+      saveStatus.textContent = "Saving locally...";
+      window.clearTimeout(saveTimer);
+      saveTimer = window.setTimeout(() => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        saveStatus.textContent = `Saved locally at ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+      }, 180);
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    function render() {
+      renderStepNav();
+      renderStepPanel();
+      renderSummary();
+      if (!localStorage.getItem(STORAGE_KEY)) {
+        saveStatus.textContent = "Saved locally";
+      }
+    }
+
+    function renderStepNav() {
+      stepNav.innerHTML = stepMeta.map(step => `
+        <button class="step-button ${state.activeStep === step.id ? "active" : ""}" data-step="${step.id}">
+          <strong>${step.id}. ${step.short}</strong>
+          <span>${step.title}</span>
+        </button>
+      `).join("");
+
+      stepNav.querySelectorAll("button").forEach(button => {
+        button.addEventListener("click", () => {
+          state.activeStep = Number(button.dataset.step);
+          render();
+        });
+      });
+    }
+
+    function renderStepPanel() {
+      const content = {
+        1: renderStartStep(),
+        2: renderContextStep(),
+        3: renderConceptsStep(),
+        4: renderLevelsStep(),
+        5: renderTriggersStep(),
+        6: renderAIStep(),
+        7: renderFinalStep()
+      }[state.activeStep];
+      stepPanel.innerHTML = content;
+      bindStepPanel();
+    }
+
+    function renderStartStep() {
+      return `
+        <div>
+          <div class="step-head">
+            <div>
+              <h2>Start / Why this matters</h2>
+              <p>This tool helps a team agree on what should stay in normal dialogue, what needs a protected route, and what requires formal or independent escalation.</p>
+            </div>
+          </div>
+
+          <div class="mini-card" style="margin-bottom: 18px;">
+            <h3>Core message</h3>
+            <p>In sensitive committees and teams, escalation is not a sign of failure. It is a pre-agreed protection path when people, roles, or decisions come under pressure.</p>
+          </div>
+
+          <div class="learning-points">
+            <div class="mini-card">
+              <h3>Psychological safety is not harmony</h3>
+              <p>It means people can raise concerns, mistakes, and risks without fear of humiliation or retaliation.</p>
+            </div>
+            <div class="mini-card">
+              <h3>Silence often has a reason</h3>
+              <p>People may stay quiet because they fear consequences or believe speaking up will not change anything.</p>
+            </div>
+            <div class="mini-card">
+              <h3>Under-escalation is risky</h3>
+              <p>Serious concerns may remain hidden, harm may continue, and trust can be lost.</p>
+            </div>
+            <div class="mini-card">
+              <h3>Over-escalation is risky too</h3>
+              <p>If every issue becomes formal too early, relationships and ordinary dialogue may break down.</p>
+            </div>
+          </div>
+
+          <div class="mini-card" style="margin-top: 18px;">
+            <h3>Use case example</h3>
+            <p>A university ethics committee handles sensitive cases involving professors, junior researchers, administrators, and confidential concerns. Because status and dependency can influence whether people speak up, the committee needs clear escalation levels and protected routes.</p>
+          </div>
+
+          ${renderNavActions(false, true)}
+        </div>
+      `;
+    }
+
+    function renderContextStep() {
+      const context = state.context;
+      return `
+        <div>
+          <div class="step-head">
+            <div>
+              <h2>Context Capture</h2>
+              <p>Describe the real setting. The final model should fit your team, not an abstract policy.</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            ${renderField("Team / committee name", "teamName", context.teamName, "text", "e.g. Faculty Research Ethics Committee")}
+            ${renderField("Review rhythm", "reviewRhythm", context.reviewRhythm, "text", "e.g. Every six months and after major cases")}
+            ${renderField("Type of sensitive situations handled", "sensitiveSituations", context.sensitiveSituations, "textarea", "What kinds of concerns, cases, or tensions show up here?")}
+            ${renderField("Important power asymmetries", "powerAsymmetries", context.powerAsymmetries, "textarea", "Which status, contract, reporting, or reputation differences matter most?")}
+            ${renderField("People or roles needing protection", "protectionNeeds", context.protectionNeeds, "textarea", "Who may need extra protection or alternative routes?")}
+            ${renderField("Existing channels or resources", "existingChannels", context.existingChannels, "textarea", "Ombuds, HR, chair, ethics office, trusted contact, hotline...")}
+            ${renderField("What must not happen", "redLines", context.redLines, "textarea", "What outcomes, behaviors, or risks are unacceptable?", true)}
+          </div>
+
+          ${renderNavActions(true, true)}
+        </div>
+      `;
+    }
+
+    function renderConceptsStep() {
+      return `
+        <div>
+          <div class="step-head">
+            <div>
+              <h2>Concepts</h2>
+              <p>Shared language helps teams discuss difficult situations more clearly and with less defensiveness.</p>
+            </div>
+          </div>
+
+          <div class="concept-grid">
+            ${conceptCards.map(card => `
+              <article class="concept-card">
+                <h3>${card.title}</h3>
+                <p><strong>Definition:</strong> ${card.definition}</p>
+                <p style="margin-top: 10px;"><strong>Example:</strong> ${card.example}</p>
+                <p class="question">Reflection question: ${card.question}</p>
+              </article>
+            `).join("")}
+          </div>
+
+          ${renderNavActions(true, true)}
+        </div>
+      `;
+    }
+
+    function renderLevelsStep() {
+      return `
+        <div>
+          <div class="step-head">
+            <div>
+              <h2>Escalation Levels Builder</h2>
+              <p>Start with the default five-level model, then edit the language until it feels right for your team.</p>
+            </div>
+          </div>
+
+          <div class="level-grid">
+            ${state.levels.map((level, index) => `
+              <article class="level-card">
+                <span class="level-tag">Level ${level.number}</span>
+                <h3>${escapeHtml(level.name)}</h3>
+                <div class="form-grid">
+                  ${renderLevelField(index, "name", "Level name", level.name, "text")}
+                  ${renderLevelField(index, "purpose", "Purpose", level.purpose, "textarea")}
+                  ${renderLevelField(index, "triggers", "Triggers", level.triggers, "textarea")}
+                  ${renderLevelField(index, "safeStep", "Safe first step", level.safeStep, "textarea")}
+                  ${renderLevelField(index, "roles", "Roles / contact path", level.roles, "textarea")}
+                  ${renderLevelField(index, "safeguards", "Protection mechanisms", level.safeguards, "textarea")}
+                  ${renderLevelField(index, "documentation", "Documentation approach", level.documentation, "textarea")}
+                  ${renderLevelField(index, "deescalation", "De-escalation criteria", level.deescalation, "textarea")}
+                </div>
+              </article>
+            `).join("")}
+          </div>
+
+          ${renderNavActions(true, true)}
+        </div>
+      `;
+    }
+
+    function renderTriggersStep() {
+      const allSelected = [...state.selectedTriggers, ...state.customTriggers];
+      return `
+        <div>
+          <div class="step-head">
+            <div>
+              <h2>Trigger Workshop</h2>
+              <p>Select the trigger patterns that matter most in your setting, then add any custom triggers your team needs.</p>
+            </div>
+          </div>
+
+          <div class="selected-triggers">
+            <h3>Selected triggers</h3>
+            <div class="selected-list" style="margin-top: 12px;">
+              ${allSelected.length ? allSelected.map(trigger => `
+                <span class="selected-chip">
+                  ${escapeHtml(trigger)}
+                  <button type="button" data-remove-trigger="${escapeAttr(trigger)}" aria-label="Remove trigger">x</button>
+                </span>
+              `).join("") : '<span class="empty-state">No triggers selected yet.</span>'}
+            </div>
+          </div>
+
+          <div class="trigger-grid" style="margin-top: 16px;">
+            ${triggerOptions.map(trigger => `
+              <button type="button" class="chip ${state.selectedTriggers.includes(trigger) ? "active" : ""}" data-trigger="${escapeAttr(trigger)}">${escapeHtml(trigger)}</button>
+            `).join("")}
+          </div>
+
+          <div class="mini-card" style="margin-top: 18px;">
+            <h3>Add a custom trigger</h3>
+            <p>Use this for team-specific warning signs, case patterns, or protection needs not covered above.</p>
+            <div class="chip-row" style="margin-top: 14px; align-items: center;">
+              <input type="text" id="customTriggerInput" value="${escapeAttr(state.customTriggerInput)}" placeholder="Add a custom trigger..." style="flex: 1; min-width: 220px;">
+              <button type="button" class="btn-secondary" id="addTriggerButton">Add trigger</button>
+            </div>
+          </div>
+
+          ${renderNavActions(true, true)}
+        </div>
+      `;
+    }
+
+    function renderAIStep() {
+      const prompt = getPromptText(state.activePrompt);
+      return `
+        <div>
+          <div class="step-head">
+            <div>
+              <h2>AI Prompt Builder</h2>
+              <p>Use AI as a support tool for language, reflection, and blind-spot checking. It should not be the decision-maker.</p>
+            </div>
+          </div>
+
+          <div class="ai-note">
+            AI does not decide. It helps the team reflect, sharpen language, identify blind spots, and prepare documentation.
+          </div>
+
+          <div class="prompt-tabs">
+            <button type="button" class="prompt-tab ${state.activePrompt === "sharpen" ? "active" : ""}" data-prompt-tab="sharpen">Sharpen our model</button>
+            <button type="button" class="prompt-tab ${state.activePrompt === "risk" ? "active" : ""}" data-prompt-tab="risk">Risk-review our model</button>
+            <button type="button" class="prompt-tab ${state.activePrompt === "facilitate" ? "active" : ""}" data-prompt-tab="facilitate">Facilitate our workshop</button>
+          </div>
+
+          <div class="prompt-card">
+            <h3>${state.activePrompt === "sharpen" ? "Sharpen our model" : state.activePrompt === "risk" ? "Risk-review our model" : "Facilitate our workshop"}</h3>
+            <p style="margin-bottom: 14px;">The prompt below updates as you edit the workshop inputs and level definitions.</p>
+            <textarea readonly id="promptOutput">${escapeHtml(prompt)}</textarea>
+            <div class="actions">
+              <button type="button" class="btn-quiet" id="copyPromptButton">Copy prompt</button>
+              <button type="button" class="btn-secondary" id="copyOnepagerFromAi">Copy onepager text</button>
+              <button type="button" class="btn-secondary" id="copyMarkdownFromAi">Copy markdown</button>
+              <button type="button" class="btn-primary" id="jumpToFinal">Go to final onepager</button>
+            </div>
+          </div>
+
+          ${renderNavActions(true, true)}
+        </div>
+      `;
+    }
+
+    function renderFinalStep() {
+      const model = buildOnepagerData();
+      return `
+        <div class="final-step">
+          <div class="print-only">
+            <h1>Our Team Protection &amp; Escalation Model</h1>
+          </div>
+          <div class="step-head">
+            <div>
+              <h2>Final Onepager Output</h2>
+              <p>A live-generated draft your team can review, copy, print, or refine further.</p>
+            </div>
+          </div>
+
+          <div class="output-card">
+            <h3>Our Team Protection &amp; Escalation Model</h3>
+            <p>${escapeHtml(model.subtitle)}</p>
+            <div class="output-sections">
+              ${renderOutputSection("1. Purpose", model.purpose)}
+              ${renderOutputSection("2. Context", model.context)}
+              ${renderOutputSection("3. Guiding principles", model.guidingPrinciples, true)}
+              ${renderOutputSection("4. Escalation levels", model.levels)}
+              ${renderOutputSection("5. Key triggers", model.triggers, true)}
+              ${renderOutputSection("6. Roles and contact paths", model.roles, true)}
+              ${renderOutputSection("7. Protection mechanisms", model.protections, true)}
+              ${renderOutputSection("8. Documentation and confidentiality", model.documentation, true)}
+              ${renderOutputSection("9. De-escalation and recovery", model.deescalation, true)}
+              ${renderOutputSection("10. Review rhythm", model.review)}
+              ${renderOutputSection("11. Open questions", model.openQuestions)}
+            </div>
+
+            <div class="output-actions">
+              <button type="button" class="btn-primary" id="copyOnepagerButton">Copy onepager</button>
+              <button type="button" class="btn-secondary" id="copyMarkdownButton">Copy as markdown</button>
+              <button type="button" class="btn-secondary" id="printButton">Print</button>
+              <button type="button" class="btn-danger" id="resetButton">Reset all data</button>
+            </div>
+          </div>
+
+          ${renderNavActions(true, false)}
+        </div>
+      `;
+    }
+
+    function renderOutputSection(title, content, isList = false) {
+      const body = Array.isArray(content)
+        ? (content.length ? `<ul>${content.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : '<p class="empty-state">Add workshop input to strengthen this section.</p>')
+        : content
+          ? `<p>${escapeHtml(content)}</p>`
+          : '<p class="empty-state">Add workshop input to strengthen this section.</p>';
+      return `
+        <section class="output-section">
+          <h4>${title}</h4>
+          ${body}
+        </section>
+      `;
+    }
+
+    function renderField(labelText, key, value, type, placeholder, wide = false) {
+      return `
+        <div class="field ${wide ? "wide" : ""}">
+          <label for="${key}">${labelText}</label>
+          ${type === "textarea"
+            ? `<textarea id="${key}" data-context="${key}" placeholder="${escapeAttr(placeholder)}">${escapeHtml(value)}</textarea>`
+            : `<input id="${key}" type="text" data-context="${key}" value="${escapeAttr(value)}" placeholder="${escapeAttr(placeholder)}">`}
+        </div>
+      `;
+    }
+
+    function renderLevelField(index, field, labelText, value, type) {
+      const wide = field !== "name";
+      return `
+        <div class="field ${wide ? "wide" : ""}">
+          <label for="level-${index}-${field}">${labelText}</label>
+          ${type === "textarea"
+            ? `<textarea id="level-${index}-${field}" data-level-index="${index}" data-level-field="${field}">${escapeHtml(value)}</textarea>`
+            : `<input id="level-${index}-${field}" type="text" data-level-index="${index}" data-level-field="${field}" value="${escapeAttr(value)}">`}
+        </div>
+      `;
+    }
+
+    function renderNavActions(showPrevious, showNext) {
+      return `
+        <div class="nav-actions">
+          <div class="group">
+            ${showPrevious ? '<button type="button" class="btn-secondary" id="prevStepButton">Previous step</button>' : ""}
+          </div>
+          <div class="group">
+            ${showNext ? '<button type="button" class="btn-primary" id="nextStepButton">Next step</button>' : ""}
+          </div>
+        </div>
+      `;
+    }
+
+    function bindStepPanel() {
+      const prev = document.getElementById("prevStepButton");
+      const next = document.getElementById("nextStepButton");
+      if (prev) prev.addEventListener("click", () => goStep(-1));
+      if (next) next.addEventListener("click", () => goStep(1));
+
+      stepPanel.querySelectorAll("[data-context]").forEach(field => {
+        field.addEventListener("input", event => {
+          const key = event.target.dataset.context;
+          state.context[key] = event.target.value;
+          render();
+          queueSave();
+        });
+      });
+
+      stepPanel.querySelectorAll("[data-level-index]").forEach(field => {
+        field.addEventListener("input", event => {
+          const index = Number(event.target.dataset.levelIndex);
+          const key = event.target.dataset.levelField;
+          state.levels[index][key] = event.target.value;
+          render();
+          queueSave();
+        });
+      });
+
+      stepPanel.querySelectorAll("[data-trigger]").forEach(button => {
+        button.addEventListener("click", () => toggleTrigger(button.dataset.trigger));
+      });
+
+      stepPanel.querySelectorAll("[data-remove-trigger]").forEach(button => {
+        button.addEventListener("click", () => removeTrigger(button.dataset.removeTrigger));
+      });
+
+      const customTriggerInput = document.getElementById("customTriggerInput");
+      if (customTriggerInput) {
+        customTriggerInput.addEventListener("input", event => {
+          state.customTriggerInput = event.target.value;
+          queueSave();
+        });
+      }
+
+      const addTriggerButton = document.getElementById("addTriggerButton");
+      if (addTriggerButton) {
+        addTriggerButton.addEventListener("click", addCustomTrigger);
+      }
+
+      stepPanel.querySelectorAll("[data-prompt-tab]").forEach(button => {
+        button.addEventListener("click", () => {
+          state.activePrompt = button.dataset.promptTab;
+          render();
+          queueSave();
+        });
+      });
+
+      const copyPromptButton = document.getElementById("copyPromptButton");
+      if (copyPromptButton) {
+        copyPromptButton.addEventListener("click", () => copyText(getPromptText(state.activePrompt), "Prompt copied"));
+      }
+
+      const copyOnepagerFromAi = document.getElementById("copyOnepagerFromAi");
+      if (copyOnepagerFromAi) {
+        copyOnepagerFromAi.addEventListener("click", () => copyText(buildOnepagerPlainText(), "Onepager copied"));
+      }
+
+      const copyMarkdownFromAi = document.getElementById("copyMarkdownFromAi");
+      if (copyMarkdownFromAi) {
+        copyMarkdownFromAi.addEventListener("click", () => copyText(buildOnepagerMarkdown(), "Markdown copied"));
+      }
+
+      const jumpToFinal = document.getElementById("jumpToFinal");
+      if (jumpToFinal) {
+        jumpToFinal.addEventListener("click", () => {
+          state.activeStep = 7;
+          render();
+        });
+      }
+
+      const copyOnepagerButton = document.getElementById("copyOnepagerButton");
+      if (copyOnepagerButton) {
+        copyOnepagerButton.addEventListener("click", () => copyText(buildOnepagerPlainText(), "Onepager copied"));
+      }
+
+      const copyMarkdownButton = document.getElementById("copyMarkdownButton");
+      if (copyMarkdownButton) {
+        copyMarkdownButton.addEventListener("click", () => copyText(buildOnepagerMarkdown(), "Markdown copied"));
+      }
+
+      const printButton = document.getElementById("printButton");
+      if (printButton) {
+        printButton.addEventListener("click", () => window.print());
+      }
+
+      const resetButton = document.getElementById("resetButton");
+      if (resetButton) {
+        resetButton.addEventListener("click", resetAll);
+      }
+    }
+
+    function renderSummary() {
+      const contextEntries = Object.values(state.context).filter(Boolean).length;
+      const selectedCount = state.selectedTriggers.length + state.customTriggers.length;
+      const filledLevelFields = state.levels.reduce((count, level) => {
+        return count + ["name", "purpose", "triggers", "safeStep", "roles", "safeguards", "documentation", "deescalation"].filter(key => String(level[key] || "").trim()).length;
+      }, 0);
+      const totalPossible = 7 + 5 * 8 + triggerOptions.length;
+      const progress = Math.max(8, Math.min(100, Math.round(((contextEntries + filledLevelFields + selectedCount) / totalPossible) * 100)));
+      progressBar.style.width = `${progress}%`;
+
+      summaryList.innerHTML = `
+        <div class="summary-item">
+          <strong>Current step</strong>
+          <span>${stepMeta.find(step => step.id === state.activeStep).title}</span>
+        </div>
+        <div class="summary-item">
+          <strong>Context fields filled</strong>
+          <span>${contextEntries} / 7</span>
+        </div>
+        <div class="summary-item">
+          <strong>Selected triggers</strong>
+          <span>${selectedCount}</span>
+        </div>
+        <div class="summary-item">
+          <strong>Escalation levels ready</strong>
+          <span>${state.levels.length}</span>
+        </div>
+        <div class="summary-item">
+          <strong>Open questions</strong>
+          <span>${state.openQuestions.trim() ? "Added" : "Not added yet"}</span>
+        </div>
+      `;
+    }
+
+    function goStep(direction) {
+      const nextStep = Math.min(7, Math.max(1, state.activeStep + direction));
+      state.activeStep = nextStep;
+      render();
+    }
+
+    function toggleTrigger(trigger) {
+      if (state.selectedTriggers.includes(trigger)) {
+        state.selectedTriggers = state.selectedTriggers.filter(item => item !== trigger);
+      } else {
+        state.selectedTriggers = [...state.selectedTriggers, trigger];
+      }
+      render();
+      queueSave();
+    }
+
+    function removeTrigger(trigger) {
+      state.selectedTriggers = state.selectedTriggers.filter(item => item !== trigger);
+      state.customTriggers = state.customTriggers.filter(item => item !== trigger);
+      render();
+      queueSave();
+    }
+
+    function addCustomTrigger() {
+      const value = state.customTriggerInput.trim();
+      const allSelected = [...state.selectedTriggers, ...state.customTriggers];
+      if (!value) {
+        showToast("Add a trigger first");
+        return;
+      }
+      if (allSelected.includes(value)) {
+        showToast("That trigger is already selected");
+        return;
+      }
+      state.customTriggers = [...state.customTriggers, value];
+      state.customTriggerInput = "";
+      render();
+      queueSave();
+      showToast("Custom trigger added");
+    }
+
+    function buildOnepagerData() {
+      const teamName = state.context.teamName || "This team";
+      const selectedTriggers = [...state.selectedTriggers, ...state.customTriggers];
+      const defaultPrinciples = [
+        "Escalation is a protection path, not a punishment path.",
+        "Concerns raised in good faith are treated as contributions to safety and integrity.",
+        "Issues should be handled at the lowest effective level unless safety, ethics, legality, or power asymmetry require faster escalation.",
+        "Confidentiality follows a need-to-know principle.",
+        "Retaliation is not acceptable.",
+        "Independent channels are legitimate when the normal hierarchy is unsafe or conflicted.",
+        "Every escalation should have a path back to clarification, learning, and trust."
+      ];
+
+      return {
+        subtitle: `${teamName} - workshop draft`,
+        purpose: `${teamName} is creating a shared protection and escalation model to help people raise concerns early, choose safe routes, and respond proportionately when sensitive situations arise.`,
+        context: compactJoin([
+          state.context.sensitiveSituations && `Sensitive situations: ${state.context.sensitiveSituations}`,
+          state.context.powerAsymmetries && `Power asymmetries: ${state.context.powerAsymmetries}`,
+          state.context.protectionNeeds && `People or roles needing protection: ${state.context.protectionNeeds}`,
+          state.context.existingChannels && `Existing channels: ${state.context.existingChannels}`,
+          state.context.redLines && `What must not happen: ${state.context.redLines}`
+        ]),
+        guidingPrinciples: defaultPrinciples,
+        levels: state.levels.map(level => `Level ${level.number} - ${level.name}: ${level.purpose} Triggers: ${level.triggers} Safe first step: ${level.safeStep} Roles and contact path: ${level.roles} Protection mechanisms: ${level.safeguards} Documentation: ${level.documentation} De-escalation: ${level.deescalation}`),
+        triggers: selectedTriggers,
+        roles: uniqueItems(state.levels.map(level => level.roles).filter(Boolean)),
+        protections: uniqueItems(state.levels.map(level => level.safeguards).filter(Boolean)),
+        documentation: uniqueItems(state.levels.map(level => level.documentation).filter(Boolean)),
+        deescalation: uniqueItems(state.levels.map(level => level.deescalation).filter(Boolean)),
+        review: state.context.reviewRhythm || "Add a review rhythm for this model.",
+        openQuestions: state.openQuestions || "Add any unresolved questions, ambiguities, or follow-up actions here."
+      };
+    }
+
+    function buildOnepagerPlainText() {
+      const model = buildOnepagerData();
+      return [
+        "Our Team Protection & Escalation Model",
+        model.subtitle,
+        "",
+        "1. Purpose",
+        model.purpose,
+        "",
+        "2. Context",
+        model.context || "Add workshop input to strengthen this section.",
+        "",
+        "3. Guiding principles",
+        ...model.guidingPrinciples.map(item => `- ${item}`),
+        "",
+        "4. Escalation levels",
+        ...model.levels.map(item => `- ${item}`),
+        "",
+        "5. Key triggers",
+        ...(model.triggers.length ? model.triggers.map(item => `- ${item}`) : ["- Add workshop input to strengthen this section."]),
+        "",
+        "6. Roles and contact paths",
+        ...(model.roles.length ? model.roles.map(item => `- ${item}`) : ["- Add workshop input to strengthen this section."]),
+        "",
+        "7. Protection mechanisms",
+        ...(model.protections.length ? model.protections.map(item => `- ${item}`) : ["- Add workshop input to strengthen this section."]),
+        "",
+        "8. Documentation and confidentiality",
+        ...(model.documentation.length ? model.documentation.map(item => `- ${item}`) : ["- Add workshop input to strengthen this section."]),
+        "",
+        "9. De-escalation and recovery",
+        ...(model.deescalation.length ? model.deescalation.map(item => `- ${item}`) : ["- Add workshop input to strengthen this section."]),
+        "",
+        "10. Review rhythm",
+        model.review,
+        "",
+        "11. Open questions",
+        model.openQuestions
+      ].join("\n");
+    }
+
+    function buildOnepagerMarkdown() {
+      const model = buildOnepagerData();
+      const listOrFallback = items => items.length ? items.map(item => `- ${item}`).join("\n") : "- Add workshop input to strengthen this section.";
+      return [
+        "# Our Team Protection & Escalation Model",
+        `_${model.subtitle}_`,
+        "",
+        "## 1. Purpose",
+        model.purpose,
+        "",
+        "## 2. Context",
+        model.context || "Add workshop input to strengthen this section.",
+        "",
+        "## 3. Guiding principles",
+        listOrFallback(model.guidingPrinciples),
+        "",
+        "## 4. Escalation levels",
+        listOrFallback(model.levels),
+        "",
+        "## 5. Key triggers",
+        listOrFallback(model.triggers),
+        "",
+        "## 6. Roles and contact paths",
+        listOrFallback(model.roles),
+        "",
+        "## 7. Protection mechanisms",
+        listOrFallback(model.protections),
+        "",
+        "## 8. Documentation and confidentiality",
+        listOrFallback(model.documentation),
+        "",
+        "## 9. De-escalation and recovery",
+        listOrFallback(model.deescalation),
+        "",
+        "## 10. Review rhythm",
+        model.review,
+        "",
+        "## 11. Open questions",
+        model.openQuestions
+      ].join("\n");
+    }
+
+    function getPromptText(mode) {
+      const levelText = state.levels.map(level => {
+        return `Level ${level.number} - ${level.name}\nPurpose: ${level.purpose}\nTriggers: ${level.triggers}\nSafe first step: ${level.safeStep}\nRoles / contact path: ${level.roles}\nProtection mechanisms: ${level.safeguards}\nDocumentation: ${level.documentation}\nDe-escalation: ${level.deescalation}`;
+      }).join("\n\n");
+
+      const contextBlock = [
+        `Team / committee: ${state.context.teamName || "[add team name]"}`,
+        `Sensitive situations: ${state.context.sensitiveSituations || "[add situations]"}`,
+        `Power asymmetries: ${state.context.powerAsymmetries || "[add power asymmetries]"}`,
+        `People or roles needing protection: ${state.context.protectionNeeds || "[add protection needs]"}`,
+        `Existing channels: ${state.context.existingChannels || "[add existing channels]"}`,
+        `What must not happen: ${state.context.redLines || "[add red lines]"}`,
+        `Review rhythm: ${state.context.reviewRhythm || "[add review rhythm]"}`,
+        `Selected triggers: ${[...state.selectedTriggers, ...state.customTriggers].join(", ") || "[add triggers]"}`
+      ].join("\n");
+
+      if (mode === "risk") {
+        return `Act as a critical reviewer for a university escalation and employee-protection framework.\n\nReview the following model for weaknesses.\n\nContext:\n${contextBlock}\n\nCurrent model:\n${levelText}\n\nPlease identify:\n1. Where employees might still feel unsafe\n2. Where power asymmetries are insufficiently addressed\n3. Where confidentiality is unclear\n4. Where retaliation risk is not sufficiently controlled\n5. Where the model may lead to over-escalation\n6. Where the model may lead to under-escalation\n7. Missing independent channels\n8. Missing documentation or feedback-loop mechanisms\n\nThen suggest concrete improvements.`;
+      }
+
+      if (mode === "facilitate") {
+        return `Act as a facilitator for a 60-minute team workshop.\n\nDesign a practical workshop agenda to help this team co-create, test, or validate its protection and escalation model.\n\nContext:\n${contextBlock}\n\nCurrent model:\n${levelText}\n\nInclude:\n- opening framing\n- psychological safety setup\n- concept introduction\n- scenario exercise\n- trigger mapping\n- level refinement\n- risk review\n- final agreement\n- closing and next steps\n\nAdd facilitator notes for handling hierarchy, silence, fear of consequences, and sensitive cases.`;
+      }
+
+      return `Act as an expert in organizational psychology, university governance, ethics committees, and psychologically safe escalation systems.\n\nWe are designing a team-owned protection and escalation model.\n\nContext:\n${contextBlock}\n\nCurrent escalation levels:\n${levelText}\n\nPlease improve this model by:\n1. Clarifying the purpose of each level\n2. Sharpening the triggers\n3. Strengthening protection mechanisms\n4. Making power asymmetries more explicit\n5. Adding de-escalation criteria\n6. Suggesting wording that frames escalation as protection, not punishment\n\nUse practical language suitable for a university or public-sector context.`;
+    }
+
+    async function copyText(text, successMessage) {
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast(successMessage);
+      } catch (error) {
+        const fallback = document.createElement("textarea");
+        fallback.value = text;
+        document.body.appendChild(fallback);
+        fallback.select();
+        document.execCommand("copy");
+        document.body.removeChild(fallback);
+        showToast(successMessage);
+      }
+    }
+
+    function resetAll() {
+      const confirmed = window.confirm("Reset all workshop data stored in this browser?");
+      if (!confirmed) return;
+      state = structuredClone(defaultState);
+      localStorage.removeItem(STORAGE_KEY);
+      render();
+      saveStatus.textContent = "Saved locally";
+      showToast("All local data has been reset");
+    }
+
+    function compactJoin(items) {
+      return items.filter(Boolean).join(" ");
+    }
+
+    function uniqueItems(items) {
+      return [...new Set(items.map(item => item.trim()).filter(Boolean))];
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value).replace(/`/g, "&#96;");
+    }
+
+    render();
+  </script>
+</body>
+</html>
