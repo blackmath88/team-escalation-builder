@@ -174,3 +174,8 @@ Create:
 
 ```text
 index.html
+```
+
+It should contain all HTML, CSS, and JavaScript.
+
+No additional files required.
